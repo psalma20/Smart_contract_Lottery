@@ -1,7 +1,33 @@
 dependencies:
   # - <organization/repo>@<version>
   - smartcontractkit/chainlink-brownie-contracts@0.2.1
+  - OpenZeppelin/openzeppelin-contracts@3.4.0
 compiler:
  solc:
     remappings:
       - "@chainlink=smartcontractkit/chainlink-brownie-contracts@0.2.1"
+      - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.4.0"
+
+networks:
+  default: development
+  goerli:
+    eth_usd_price_feed: "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"
+    verify: True
+  #mainnet forked blockchain 
+  #local obe so it must be false "verification "
+  ## we dont want to deploy the mock also 
+  #and we need it to get a local account 
+  mainnet-fork-dev:
+    eth_usd_price_feed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+    verify: False
+
+  development:
+    verify: False
+  ganache-local:
+    verify: False
+  
+dotenv: .env
+#Improving method 3 
+#it will be transformed to the env variable 
+wallets:
+ from_key: ${PRIVATE_KEY}
