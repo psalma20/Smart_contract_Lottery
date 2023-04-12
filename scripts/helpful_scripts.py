@@ -1,4 +1,4 @@
-from brownie import Lottery,MockV3Aggregator,config,network,accounts,Contract
+from brownie import Lottery,MockV3Aggregator,VRFCoordinatorMock,config,network,accounts,Contract,LinkToken,interface 
 from web3 import Web3
 
 
@@ -23,8 +23,8 @@ def get_account(index=None, id=None ):
    network.show_active() in FORKED_LOCAL_ENVIROMENTS
  ) :
   return accounts[0]
- else:
-  return accounts.add(config["wallets"]["from_key"]
+ ##Default
+ return accounts.add(config["wallets"]["from_key"]
             )
  
  
@@ -32,43 +32,71 @@ def get_account(index=None, id=None ):
   #DEVELOPMENT
 ### WHICH MEANS WHENEVER We see eth_usd_price_feed you know that we will get the MockV3Aggregator
 
-contract_to_mock={"eth_usd_price_feed":MockV3Aggregator
- 
+contract_to_mock = {
+    "eth_usd_price_feed": MockV3Aggregator,
+    "vrf_coordinator": VRFCoordinatorMock,
+    "link_token": LinkToken,
 }
-def get_contract(contract_name ):
- """This fxn will grab the contract addresses from the brownie config  if defiened 
- Otherwise,it will deoloy a mock version of the contract, and 
- return the mock contract.
 
- Args:
-     contract_name (string)
- Returns:
-     brownie.network.contract.ProjectContract: The most recently deployed 
-     version of  this contract.
-     example :Mock3Aggregator[-1]
-
- """
- contract_type = contract_to_mock[contract_name]
- if network.show_active()in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-  if len(contract_type)<=0:
-   #MockV3Aggregator.length
-   deploy_mocks()
-   #MockV3Aggregator[-1]
-   contract = contract_type[-1]
-  else:
-   contract_address=config["networks"][network.show_active()][contract_name]
-   contract=Contract.from_abi(contract_type._name,contract_address,contract_type.abi)
-  return contract
-
+def get_contract(contract_name):
+    """This function will grab the contract addresses from the brownie config
+    if defined, otherwise, it will deploy a mock version of that contract, and
+    return that mock contract.
+        Args:
+            contract_name (string)
+        Returns:
+            brownie.network.contract.ProjectContract: The most recently deployed
+            version of this contract.
+    """
+    contract_type = contract_to_mock[contract_name]
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        if len(contract_type) <= 0:
+            # MockV3Aggregator.length
+            deploy_mocks()
+        contract = contract_type[-1]
+        # MockV3Aggregator[-1]
+    else:
+        contract_address = config["networks"][network.show_active()][contract_name]
+        # address
+        # ABI
+        contract = Contract.from_abi(
+            contract_type._name, contract_address, contract_type.abi
+        )
+        # MockV3Aggregator.abi
+    return contract
 
    
    
  
 
- def deploy_mocks(decimals=DECIMALS,initial_value=STARTING_PRICE):
+def deploy_mocks(decimals=DECIMALS,initial_value=STARTING_PRICE):
+    
     account=get_account()
+    #1.pricefeed
     MockV3Aggregator.deploy(decimals,initial_value,{"from":account})
+    #2. Link token 
+    link_token=LinkToken.deploy({"from":account})
+    #3.VRFCoordinator
+    #4. Lottery deployed 
+    VRFCoordinatorMock.deploy(link_token.address,{"from":account})
+
 
     print("Deployed!!")
   
+def fund_with_link(contract_address,account=None,link_token=None,amount=250000000000000000): #0.25 Link 
+   
+   account=account if account else get_account()
+   link_token=link_token if link_token else get_contract("link_token")
+
+   #WAY1
+   tx= link_token.transfer(contract_address,amount,{"from":account})
+   #WAY2 from brownie interface
+   #link_token_contract=interface.LinkTokenInterface(link_token.address)
+   #tx=link_token_contract.transfer(contract_address,amount,{"from":account})
+   tx.wait(1)
+   print("Contract is funded!! ")
+   return tx
+
+
+    
  

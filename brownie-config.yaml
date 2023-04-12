@@ -1,17 +1,25 @@
 dependencies:
   # - <organization/repo>@<version>
-  - smartcontractkit/chainlink-brownie-contracts@0.2.1
+  - smartcontractkit/chainlink-brownie-contracts@0.2.0
   - OpenZeppelin/openzeppelin-contracts@3.4.0
 compiler:
  solc:
     remappings:
-      - "@chainlink=smartcontractkit/chainlink-brownie-contracts@0.2.1"
+      - "@chainlink=smartcontractkit/chainlink-brownie-contracts@0.2.0"
       - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.4.0"
 
 networks:
   default: development
-  goerli:
-    eth_usd_price_feed: "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"
+  development:
+   keyhash: "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c"
+   fee: 250000000000000000
+
+  sepolia:
+    vrf_coordinator: "0x271682DEB8C4E0901D1a1550aD2e64D568E69909"
+    keyhash: "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c"
+    link_token: "0x779877A7B0D9E8603169DdbD7836e478b4624789"
+    fee: 250000000000000000
+    eth_usd_price_feed: "0x694AA1769357215DE4FAC081bf1f309aDC325306"
     verify: True
   #mainnet forked blockchain 
   #local obe so it must be false "verification "
@@ -21,10 +29,9 @@ networks:
     eth_usd_price_feed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
     verify: False
 
-  development:
-    verify: False
-  ganache-local:
-    verify: False
+  
+    
+
   
 dotenv: .env
 #Improving method 3 
