@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////////////////////
 //ETH ->Pay some ETH/transaction gas to pay the smartcontract platform a littlebit of ETH for performing a transaction
 //LINK->"For smartcontract that operate with an oracle" We pay using LINK gas/ oracle gas to pay the oracle for providing data or some type of external computation for a smart contract
+//Events are pieces of data executed and stored  in the blockchain but not accesible by any smart contract 
 
 pragma solidity ^0.6.6;
 
@@ -35,6 +36,7 @@ contract Lottery is VRFConsumerBase, Ownable {
     LOTTERY_STATE public lottery_state;
     uint256 public fee;
     bytes32 public keyhash;
+    event RequestedRandomness(bytes32 requestId);
 
 
     //VRFConsumerBase paramters will be VRF consumeraddress,linktoken address
@@ -108,6 +110,8 @@ contract Lottery is VRFConsumerBase, Ownable {
         // ) % players.length;
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
         bytes32 requestId = requestRandomness(keyhash, fee);
+        emit RequestedRandomness(requestId);
+
     }
     //Internal because only the VRF coordinator can return the fxn 
     function fulfillRandomness(bytes32 _requestId, uint256 _randomness ) internal override{
